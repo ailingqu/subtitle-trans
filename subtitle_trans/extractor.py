@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import torch
 import whisperx
 from whisperx.asr import FasterWhisperPipeline
 
@@ -15,10 +16,10 @@ class Extractor:
 
     def __init__(self,
                  # cuda or cpu
-                 device="cpu",
+                 device="cuda" if torch.cuda.is_available() else "cpu",
                  device_index=0,
                  # float16 or int8 or int8_float16
-                 compute_type="int8", ):
+                 compute_type="float16" if torch.cuda.is_available() else "int8"):
         self.device = device
         self.device_index = device_index
         self.compute_type = compute_type
