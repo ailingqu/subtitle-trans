@@ -28,7 +28,7 @@ class Extractor:
         self.whisperx_model = whisperx.load_model(model, device, device_index=device_index, compute_type=compute_type,
                                                   download_root=self.download_root, threads=16)
 
-    def transcribe(self, audio_file: str, batch_size: int):
+    def transcribe(self, audio_file: str, batch_size: int, use_auth_token: str):
         audio = whisperx.load_audio(audio_file)
         result = self.whisperx_model.transcribe(audio, batch_size=batch_size, print_progress=print_progress,
                                                 combined_progress=print_progress)
@@ -36,7 +36,7 @@ class Extractor:
                                                       model_dir=self.download_root)
         result = whisperx.align(result["segments"], model_a, metadata, audio, self.device, return_char_alignments=False,
                                 print_progress=print_progress, combined_progress=print_progress)
-        diarize_model = whisperx.DiarizationPipeline(use_auth_token="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",
+        diarize_model = whisperx.DiarizationPipeline(use_auth_token=use_auth_token,
                                                      device=self.device)
         diarize_segments = diarize_model(audio)
         return whisperx.assign_word_speakers(diarize_segments, result)
