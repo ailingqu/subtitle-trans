@@ -1,3 +1,4 @@
 whisperx==3.1.5
 faster-whisper==1.0.1
 speechbrain==0.5.16
+googletrans==3.1.0a0

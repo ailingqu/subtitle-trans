@@ -3,6 +3,7 @@ from pathlib import Path
 import torch
 import whisperx
 from whisperx.asr import FasterWhisperPipeline
+from whisperx.utils import format_timestamp
 
 print_progress = True
 
@@ -18,8 +19,8 @@ class Extractor:
                  # cuda or cpu
                  device="cuda" if torch.cuda.is_available() else "cpu",
                  device_index=0,
-                 # float16 or int8 or int8_float16
-                 compute_type="float16" if torch.cuda.is_available() else "int8"):
+                 # float16 or int8 or float32
+                 compute_type="float32" if torch.cuda.is_available() else "int8"):
         self.device = device
         self.device_index = device_index
         self.compute_type = compute_type
@@ -48,3 +49,15 @@ class Extractor:
         audio = whisperx.load_audio(audio_file)
         segments = model(audio)
         return whisperx.assign_word_speakers(segments, transcribe_result)
+
+    def write_srt_file(self, transcribe_result, out_file: str):
+        with open(out_file, 'w', encoding='utf-8') as f:
+            segments = transcribe_result["segments"]
+            for index, segment in enumerate(segments):
+                line = (f"{index}\n{format_timestamp(segment['start'], always_include_hours=True)} "
+                        f"--> {format_timestamp(segment['end'], always_include_hours=True)}\n"
+                        f"{str(segment['text']).strip()}\n")
+                if "translated" in segment:
+                    line += f"{str(segment['translated'])}\n"
+                line += "\n"
+                f.write(line)
